@@ -6,23 +6,11 @@ class Program
 {
     static void Main(string[] args)
     {
-        Console.WriteLine("Welcome to the Journal Program!");
-
+        Journal journal = new Journal();
+        PromptGenerator promptGenerator = new PromptGenerator();
         string choice = "";
 
-        List<string> prompts = new List<string>
-        {
-            "If I had to do one thing today, what would it be?",
-            "What significant thing happened today?",
-            "What felt boring in your day?",
-            "Was there somebody you think was blessed because of you today?",
-            "Have you seen the Hand of the Lord in your life today?"
-        };
-
-        List<string> entries = new List<string>();
-
-        Random randList = new Random();
-
+        Console.WriteLine("Welcome to the Journal Program!");
 
         while (choice != "5")
         {
@@ -38,56 +26,36 @@ class Program
 
             if (choice == "1")
             {
-                int index = randList.Next(prompts.Count);
-                string randomPrompt = prompts[index];
-                Console.WriteLine($"{randomPrompt}");
-                string entry = Console.ReadLine();
+                string prompt = promptGenerator.GetRandomPrompt();
+                Console.WriteLine($"{prompt}");
+                string response = Console.ReadLine();
 
-                DateTime theCurrentTime = DateTime.Now;
-                string dateText = theCurrentTime.ToShortDateString();
+                Entry entry = new Entry()
+                {
+                    _date = DateTime.Now.ToShortDateString(),
+                    _promptText = prompt,
+                    _entryText = response
+                };
 
-                string display = ($"{dateText}, {randomPrompt} Response: {entry}");
-
-                entries.Add(display);
-
+                journal.AddEntry(entry);
             }
             else if (choice == "2")
             {
-                foreach (string entry in entries)
-                {
-                    Console.WriteLine(entry);
-                }
+                journal.DisplayAll();
             }
             else if (choice == "3")
             {
                 {
                     Console.WriteLine("What is the filename?");
                     string filename = Console.ReadLine();
-
-                    if (File.Exists(filename))
-                    {
-                        string[] lines = File.ReadAllLines(filename);
-                        entries = new List<string>(lines);
-                    }
-                    else
-                    {
-                        Console.WriteLine("File not found.");
-                    }
-
+                    journal.LoadFromFile(filename);
                 }
             }
             else if (choice == "4")
             {
                 Console.WriteLine("What is the filename?");
                 string filename = Console.ReadLine();
-
-                using (StreamWriter outputFile = new StreamWriter(filename))
-                {
-                    foreach (string entry in entries)
-                    {
-                        outputFile.WriteLine(entry);
-                    }
-                }
+                journal.SaveToFile(filename);
             }
         }
 
